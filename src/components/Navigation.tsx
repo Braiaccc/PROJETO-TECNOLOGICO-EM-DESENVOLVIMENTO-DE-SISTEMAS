@@ -1,4 +1,4 @@
-import { Home, Plus, List, Package, History } from "lucide-react";
+import { Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -9,11 +9,7 @@ interface NavigationProps {
 
 export const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
   const navigationItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: Home },
-    { id: 'novo-aluguel', label: 'Novo Aluguel', icon: Plus },
-    { id: 'alugueis', label: 'Aluguéis', icon: List },
-    { id: 'materiais', label: 'Materiais', icon: Package },
-    { id: 'historico', label: 'Histórico', icon: History },
+    { id: 'dashboard', label: 'Dashboard', icon: Home }
   ];
 
   return (
