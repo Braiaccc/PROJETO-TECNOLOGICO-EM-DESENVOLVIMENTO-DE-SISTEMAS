@@ -85,7 +85,7 @@ export const Dashboard = () => {
 
   return (
     <div className="p-6 space-y-6">
-      {/* Stats Cards */}
+      {/* Cards de status */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {dashboardStats.map((stat) => {
           const Icon = stat.icon;
@@ -103,7 +103,7 @@ export const Dashboard = () => {
         })}
       </div>
 
-      {/* Recent Rentals */}
+      {/* Alugueis recentes */}
       <Card>
         <CardHeader>
           <CardTitle>Aluguéis Recentes</CardTitle>
