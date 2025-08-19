@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Header } from "@/components/Header";
 import { Navigation } from "@/components/Navigation";
 import { Dashboard } from "@/components/Dashboard";
+import { NovoAluguel } from "@/components/NovoAluguel";
+import { Historico } from "@/components/Historico";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -10,6 +12,10 @@ const Index = () => {
     switch (activeTab) {
       case "dashboard":
         return <Dashboard />;
+      case "novoAluguel":
+        return <NovoAluguel/>;
+      case "historico":
+        return <Historico/>;
       default:
         return <Dashboard />;
     }
