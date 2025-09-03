@@ -12,6 +12,7 @@ export const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
     { id: 'dashboard', label: 'Dashboard', icon: Home }, 
     { id: 'novoAluguel', label: 'Novo aluguel', icon: Home }, 
     { id: 'historico', label: 'Historico', icon: List }, 
+    { id: 'materiais', label: 'CadastroMateriais', icon: Plus }, 
   ];
 
   return (

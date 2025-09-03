@@ -4,6 +4,7 @@ import { Navigation } from "@/components/Navigation";
 import { Dashboard } from "@/components/Dashboard";
 import { NovoAluguel } from "@/components/NovoAluguel";
 import { Historico } from "@/components/Historico";
+import { CadastroMateriais } from "@/components/CadastroMateriais";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -16,6 +17,8 @@ const Index = () => {
         return <NovoAluguel/>;
       case "historico":
         return <Historico/>;
+      case "materiais":
+        return <CadastroMateriais/>
       default:
         return <Dashboard />;
     }
