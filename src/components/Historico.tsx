@@ -1,230 +1,122 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Eye, Download, Filter, Calendar } from "lucide-react";
+import { Eye, Calendar } from "lucide-react";
 
 export const Historico = () => {
+  const [alugueis, setAlugueis] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("todos");
-  const [dateFilter, setDateFilter] = useState("30dias");
+  const [loading, setLoading] = useState(true);
 
-  const historico = [
-    {
-      id: "ALG-004",
-      cliente: "Construtora Norte",
-      materiais: ["Serra Circular", "Esmerilhadeira"],
-      dataRetirada: "2024-07-28",
-      dataDevolucao: "2024-08-01",
-      dataRealDevolucao: "2024-08-01",
-      status: "concluido",
-      pagamento: "pago",
-      valor: 190.00,
-      diasAtraso: 0,
-    },
-    {
-      id: "ALG-006",
-      cliente: "Obras Central",
-      materiais: ["Betoneira", "Vibrador"],
-      dataRetirada: "2024-07-20",
-      dataDevolucao: "2024-07-25",
-      dataRealDevolucao: "2024-07-27",
-      status: "concluido",
-      pagamento: "pago",
-      valor: 350.00,
-      diasAtraso: 2,
-    },
-    {
-      id: "ALG-007",
-      cliente: "Reformas Modernas",
-      materiais: ["Compressor", "Pistola"],
-      dataRetirada: "2024-07-15",
-      dataDevolucao: "2024-07-20",
-      dataRealDevolucao: "2024-07-20",
-      status: "concluido",
-      pagamento: "pago",
-      valor: 275.00,
-      diasAtraso: 0,
-    },
-    {
-      id: "ALG-008",
-      cliente: "Construção Premium",
-      materiais: ["Furadeira", "Parafusadeira", "Nível"],
-      dataRetirada: "2024-07-10",
-      dataDevolucao: "2024-07-15",
-      dataRealDevolucao: "2024-07-18",
-      status: "concluido",
-      pagamento: "pendente",
-      valor: 180.00,
-      diasAtraso: 3,
-    },
-  ];
+  // UseEffect para buscar os dados da API quando o componente for montado
+  useEffect(() => {
+    const fetchRentals = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/api/rentals");
+        if (!response.ok) {
+          throw new Error('Falha ao buscar os aluguéis.');
+        }
+        const data = await response.json();
+        setAlugueis(data);
+      } catch (error) {
+        console.error("Erro ao carregar histórico:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchRentals();
+  }, []);
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "concluido":
-        return <Badge className="bg-success text-success-foreground">Concluído</Badge>;
-      case "cancelado":
-        return <Badge variant="destructive">Cancelado</Badge>;
-      default:
-        return <Badge variant="outline">{status}</Badge>;
-    }
-  };
-
-  const getPaymentBadge = (pagamento: string) => {
-    switch (pagamento) {
-      case "pago":
-        return <Badge className="bg-success text-success-foreground">Pago</Badge>;
-      case "pendente":
-        return <Badge className="bg-warning text-warning-foreground">Pendente</Badge>;
-      default:
-        return <Badge variant="outline">{pagamento}</Badge>;
-    }
-  };
-
-  const getAtrasoBadge = (diasAtraso: number) => {
-    if (diasAtraso === 0) {
-      return <Badge variant="outline" className="bg-success/10 text-success">No Prazo</Badge>;
-    } else {
-      return <Badge variant="destructive">{diasAtraso} dias de atraso</Badge>;
-    }
-  };
-
-  const filteredHistorico = historico.filter(item => {
+  const filteredHistorico = alugueis.filter(item => {
     const matchesSearch = item.cliente.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         item.id.toLowerCase().includes(searchTerm.toLowerCase());
+      item._id.toLowerCase().includes(searchTerm.toLowerCase()); // MongoDB usa _id
     const matchesStatus = statusFilter === "todos" || item.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
   const totalValor = filteredHistorico.reduce((sum, item) => sum + item.valor, 0);
 
+  if (loading) {
+    return (
+      <div className="p-6 text-center">
+        <p>Carregando histórico...</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="p-6 space-y-6">
-      <Card>
-        <CardHeader>
-          <div className="flex justify-between items-center">
-            <CardTitle className="flex items-center gap-2">
-              <Calendar className="h-5 w-5" />
-              Histórico de Aluguéis
-            </CardTitle>
-          </div>
+    <div className="p-6 space-y-6 max-w-4xl mx-auto">
+      <Card className="rounded-xl shadow-lg">
+        <CardHeader className="bg-gray-50/50 rounded-t-xl">
+          <CardTitle className="flex items-center gap-2 text-2xl font-bold text-gray-800">
+            <Calendar className="h-6 w-6 text-indigo-600" />
+            Histórico de Aluguéis
+          </CardTitle>
         </CardHeader>
-        <CardContent>
-          {/* Filtros */}
-          <div className="flex flex-col lg:flex-row gap-4 mb-6">
-            <div className="flex-1 relative">
-              <Input
-                placeholder="Buscar por cliente ou código..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full lg:w-48">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="todos">Todos</SelectItem>
-                <SelectItem value="concluido">Concluído</SelectItem>
-                <SelectItem value="cancelado">Cancelado</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select value={dateFilter} onValueChange={setDateFilter}>
-              <SelectTrigger className="w-full lg:w-48">
-                <SelectValue placeholder="Período" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="30dias">Últimos 30 dias</SelectItem>
-                <SelectItem value="90dias">Últimos 90 dias</SelectItem>
-                <SelectItem value="ano">Este ano</SelectItem>
-                <SelectItem value="todos">Todo período</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Resumo */}
-          <div className="bg-muted/30 p-4 rounded-lg mb-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-              <div>
-                <p className="text-2xl font-bold">{filteredHistorico.length}</p>
-                <p className="text-sm text-muted-foreground">Aluguéis Concluídos</p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-success">R$ {totalValor.toFixed(2)}</p>
-                <p className="text-sm text-muted-foreground">Valor Total</p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-warning">
-                  {filteredHistorico.filter(item => item.diasAtraso > 0).length}
-                </p>
-                <p className="text-sm text-muted-foreground">Com Atraso</p>
-              </div>
+        <CardContent className="p-6">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
+            <Input
+              placeholder="Buscar por cliente ou ID..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full md:w-auto flex-1 rounded-lg"
+            />
+            <div className="flex gap-2 w-full md:w-auto">
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-full md:w-[180px] rounded-lg">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todos">Todos</SelectItem>
+                  <SelectItem value="concluido">Concluído</SelectItem>
+                  <SelectItem value="pendente">Pendente</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value="30dias" onValueChange={() => {}}>
+                <SelectTrigger className="w-full md:w-[180px] rounded-lg">
+                  <SelectValue placeholder="Período" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="30dias">Últimos 30 dias</SelectItem>
+                  <SelectItem value="60dias">Últimos 60 dias</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
-
-          {/* Lista do Histórico */}
           <div className="space-y-4">
-            {filteredHistorico.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                Nenhum registro encontrado com os filtros aplicados.
-              </div>
-            ) : (
+            {filteredHistorico.length > 0 ? (
               filteredHistorico.map((item) => (
-                <div
-                  key={item.id}
-                  className="p-4 border rounded-lg hover:bg-muted/30 transition-colors"
-                >
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-3 flex-wrap">
-                      <span className="font-semibold text-lg">{item.id}</span>
-                      {getStatusBadge(item.status)}
-                      {getPaymentBadge(item.pagamento)}
-                      {getAtrasoBadge(item.diasAtraso)}
-                    </div>
-                    <Button variant="ghost" size="sm">
-                      <Eye className="h-4 w-4 mr-2" />
-                      Ver Detalhes
-                    </Button>
+                <div key={item._id} className="p-4 border border-gray-200 rounded-lg shadow-sm transition-transform transform hover:scale-[1.01] hover:shadow-md">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="font-semibold text-lg">{item.cliente}</span>
+                    <Badge variant="outline" className="text-gray-600">{`ID: ${item._id}`}</Badge>
                   </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 text-sm">
-                    <div>
-                      <p className="text-muted-foreground">Cliente:</p>
-                      <p className="font-medium">{item.cliente}</p>
-                    </div>
-                    
-                    <div>
-                      <p className="text-muted-foreground">Materiais:</p>
-                      <p>{item.materiais.join(", ")}</p>
-                    </div>
-                    
-                    <div>
-                      <p className="text-muted-foreground">Período Previsto:</p>
-                      <p>
-                        {new Date(item.dataRetirada).toLocaleDateString()} - {" "}
-                        {new Date(item.dataDevolucao).toLocaleDateString()}
-                      </p>
-                    </div>
-
-                    <div>
-                      <p className="text-muted-foreground">Devolução Real:</p>
-                      <p>{new Date(item.dataRealDevolucao).toLocaleDateString()}</p>
-                    </div>
-                    
-                    <div>
-                      <p className="text-muted-foreground">Valor:</p>
-                      <p className="font-medium">R$ {item.valor.toFixed(2)}</p>
-                    </div>
+                  <div className="grid grid-cols-2 gap-2 text-sm text-gray-600">
+                    <p>Materiais: <span className="font-medium">{item.materiais.join(", ")}</span></p>
+                    <p>Período: <span className="font-medium">{item.dataRetirada} - {item.dataDevolucao}</span></p>
+                    <p>Valor: <span className="font-medium text-green-600">R$ {item.valor.toFixed(2)}</span></p>
+                    <p>Status: <span className={`font-medium ${item.status === "concluido" ? "text-green-500" : "text-yellow-500"}`}>{item.status}</span></p>
+                  </div>
+                  <div className="mt-4 flex justify-end">
+                    <Button size="sm" variant="ghost" className="text-indigo-600 hover:text-indigo-700">
+                      <Eye className="h-4 w-4 mr-1" /> Ver Detalhes
+                    </Button>
                   </div>
                 </div>
               ))
+            ) : (
+              <p className="text-center text-gray-500">Nenhum aluguel encontrado.</p>
             )}
           </div>
+        </CardContent>
+        <CardContent className="bg-gray-50/50 rounded-b-xl py-4 px-6 mt-6">
+          <p className="font-bold text-lg text-gray-800">
+            Valor Total: <span className="text-green-600">R$ {totalValor.toFixed(2)}</span>
+          </p>
         </CardContent>
       </Card>
     </div>
